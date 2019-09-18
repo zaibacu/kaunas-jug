@@ -1,0 +1,28 @@
+#!/bin/sh
+
+"exec" "clj" "-Sdeps" "{:deps,{org.apache.tika/tika-core,{:mvn/version,\"1.22\"},org.apache.tika/tika-parsers,{:mvn/version,\"1.22\"}}}" "$0" "$@"
+
+(ns jug-example
+  (:require [clojure.java.io :as io])
+  (:import [org.apache.tika Tika]
+           [org.apache.tika.parser AutoDetectParser ParseContext]
+           [org.apache.tika.sax BodyContentHandler]
+           [org.apache.tika.metadata Metadata]))
+
+
+(defn detect-file-type [this f]
+  (.detect this f))
+
+(defn parse-content [this f]
+  (let [parser  (new AutoDetectParser)
+        handler (new BodyContentHandler)
+        meta    (new Metadata)
+        context (new ParseContext)]
+    (.parse parser (io/input-stream f) handler meta context)
+    (.toString handler)))
+
+(let [fname (first *command-line-args*)
+      tika (new Tika)
+      file (io/file fname)]
+  (println "File type: " (detect-file-type tika file))
+  (println "File content: " (parse-content tika file)))
