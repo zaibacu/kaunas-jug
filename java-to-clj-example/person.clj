@@ -9,7 +9,6 @@
 (defn read-data [fpath]
   (let [reader (io/reader fpath)
         [header & body] (csv/read-csv reader)]
-    (println (format "Header is: %s" header))
     body))
 
 (defn parse-person
