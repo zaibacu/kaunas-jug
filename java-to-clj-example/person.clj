@@ -1,21 +1,24 @@
 (ns kaunas-jug.example.person
-  (:import [jug.kaunas Person PersonBuilder]))
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]
+            [clj-time.core :as t]
+            [clj-time.format :as f]
+            [clj-time.local :as l])
+  (:import [jug.kaunas Person]))
 
-(defn person-1 []
-  (new Person "Test1" "Last" 25 ["Swimming" "Skiing"]))
+(defn read-data [fpath]
+  (let [reader (io/reader fpath)
+        [header & body] (csv/read-csv reader)]
+    (println (format "Header is: %s" header))
+    body))
 
-(defn person-2 []
-  (-> (PersonBuilder/builder)
-      (.withName "Test2" "Last")
-      (.withAge 28)
-      (.withHobby "Swimming")
-      (.withHobby "Karate")
-      (.withHobby "Wrestling")
-      (.build)))
+(defn parse-person
+  [[fname lname date-of-birth hobbies]]
+  (let [age (-> (f/parse (f/formatter "MM/dd/yyyy") date-of-birth)
+                (t/interval (l/local-now))
+                (t/in-years))]
+    (new Person fname lname age (clojure.string/split hobbies #";"))))
 
-(defn -main []
-  (let [p1 (person-1)
-        p2 (person-2)]
-    (println "Hello!")
-    (.printHobbies p1)
-    (.printHobbies p2)))
+(defn read-persons [fpath]
+  (map parse-person
+       (read-data fpath)))
