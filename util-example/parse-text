@@ -7,17 +7,25 @@
   (:import [org.apache.tika Tika]
            [org.apache.tika.parser AutoDetectParser ParseContext]
            [org.apache.tika.sax BodyContentHandler]
-           [org.apache.tika.metadata Metadata]))
+           [org.apache.tika.metadata Metadata]
+           [org.apache.tika.parser.ocr TesseractOCRConfig]))
 
 
 (defn detect-file-type [this f]
   (.detect this f))
+
+(defn setup-ocr [context]
+  (let [tesseract-cfg (new TesseractOCRConfig)]
+    (.setLanguage tesseract-cfg "eng+deu")
+    (.setTesseractPath tesseract-cfg "/usr/lib/tesseract")
+    (.set context (class TesseractOCRConfig) tesseract-cfg)))
 
 (defn parse-content [this f]
   (let [parser  (new AutoDetectParser)
         handler (new BodyContentHandler)
         meta    (new Metadata)
         context (new ParseContext)]
+    (setup-ocr context)
     (.parse parser (io/input-stream f) handler meta context)
     (.toString handler)))
 
