@@ -1,0 +1,4 @@
+{:deps
+ {jug.kaunas           {:local/root  "./java/Person.jar"}
+  org.clojure/data.csv {:mvn/version "0.1.4"}
+  clj-time             {:mvn/version "0.15.2"}}}
