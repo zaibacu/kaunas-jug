@@ -32,5 +32,6 @@
 (let [fname (first *command-line-args*)
       tika (new Tika)
       file (io/file fname)]
+  (println "File: " fname)
   (println "File type: " (detect-file-type tika file))
   (println "File content: " (parse-content tika file)))
